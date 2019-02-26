@@ -41,8 +41,8 @@ BLECharacteristic* BLECharacteristicMap::getByUUID(const char* uuid) {
  */
 BLECharacteristic* BLECharacteristicMap::getByUUID(BLEUUID uuid) {
 	for (auto &myPair : m_uuidMap) {
-		if (myPair.first->getUUID().equals(uuid)) {
-			return myPair.first;
+		if (myPair.second->getUUID().equals(uuid)) {
+			return myPair.second;
 		}
 	}
 	//return m_uuidMap.at(uuid.toString());
@@ -56,8 +56,10 @@ BLECharacteristic* BLECharacteristicMap::getByUUID(BLEUUID uuid) {
  */
 BLECharacteristic* BLECharacteristicMap::getFirst() {
 	m_iterator = m_uuidMap.begin();
-	if (m_iterator == m_uuidMap.end()) return nullptr;
-	BLECharacteristic* pRet = m_iterator->first;
+	if (m_iterator == m_uuidMap.end()) {
+		return nullptr;
+	}
+	BLECharacteristic* pRet = m_iterator->second;
 	m_iterator++;
 	return pRet;
 } // getFirst
@@ -68,8 +70,10 @@ BLECharacteristic* BLECharacteristicMap::getFirst() {
  * @return The next characteristic in the map.
  */
 BLECharacteristic* BLECharacteristicMap::getNext() {
-	if (m_iterator == m_uuidMap.end()) return nullptr;
-	BLECharacteristic* pRet = m_iterator->first;
+	if (m_iterator == m_uuidMap.end()) {
+		return nullptr;
+	}
+	BLECharacteristic* pRet = m_iterator->second;
 	m_iterator++;
 	return pRet;
 } // getNext
@@ -81,10 +85,13 @@ BLECharacteristic* BLECharacteristicMap::getNext() {
  * @param [in] gatts_if
  * @param [in] param
  */
-void BLECharacteristicMap::handleGATTServerEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t* param) {
+void BLECharacteristicMap::handleGATTServerEvent(
+		esp_gatts_cb_event_t      event,
+		esp_gatt_if_t             gatts_if,
+		esp_ble_gatts_cb_param_t* param) {
 	// Invoke the handler for every Service we have.
-	for (auto& myPair : m_uuidMap) {
-		myPair.first->handleGATTServerEvent(event, gatts_if, param);
+	for (auto &myPair : m_uuidMap) {
+		myPair.second->handleGATTServerEvent(event, gatts_if, param);
 	}
 } // handleGATTServerEvent
 
@@ -95,8 +102,9 @@ void BLECharacteristicMap::handleGATTServerEvent(esp_gatts_cb_event_t event, esp
  * @param [in] characteristic The characteristic to cache.
  * @return N/A.
  */
-void BLECharacteristicMap::setByHandle(uint16_t handle, BLECharacteristic* characteristic) {
-	m_handleMap.insert(std::pair<uint16_t, BLECharacteristic*>(handle, characteristic));
+void BLECharacteristicMap::setByHandle(uint16_t handle,
+		BLECharacteristic *characteristic) {
+	m_handleMap.insert(std::pair<uint16_t, BLECharacteristic *>(handle, characteristic));
 } // setByHandle
 
 
@@ -106,8 +114,10 @@ void BLECharacteristicMap::setByHandle(uint16_t handle, BLECharacteristic* chara
  * @param [in] characteristic The characteristic to cache.
  * @return N/A.
  */
-void BLECharacteristicMap::setByUUID(BLECharacteristic* pCharacteristic, BLEUUID uuid) {
-	m_uuidMap.insert(std::pair<BLECharacteristic*, std::string>(pCharacteristic, uuid.toString()));
+void BLECharacteristicMap::setByUUID(
+		BLEUUID            uuid,
+		BLECharacteristic *pCharacteristic) {
+	m_uuidMap.insert(std::pair<std::string, BLECharacteristic *>(uuid.toString(), pCharacteristic));
 } // setByUUID
 
 
@@ -118,13 +128,13 @@ void BLECharacteristicMap::setByUUID(BLECharacteristic* pCharacteristic, BLEUUID
 std::string BLECharacteristicMap::toString() {
 	std::stringstream stringStream;
 	stringStream << std::hex << std::setfill('0');
-	int count = 0;
+	int count=0;
 	for (auto &myPair: m_uuidMap) {
 		if (count > 0) {
 			stringStream << "\n";
 		}
 		count++;
-		stringStream << "handle: 0x" << std::setw(2) << myPair.first->getHandle() << ", uuid: " + myPair.first->getUUID().toString();
+		stringStream << "handle: 0x" << std::setw(2) << myPair.second->getHandle() << ", uuid: " + myPair.second->getUUID().toString();
 	}
 	return stringStream.str();
 } // toString
