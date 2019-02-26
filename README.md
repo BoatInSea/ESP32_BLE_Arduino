@@ -1,3 +1,8 @@
+This fork code support wechat airsync protocol in BLE.
+
+
+
+
 # ESP32 BLE for Arduino
 The Arduino IDE provides an excellent library package managed where versions of libraries can be downloaded and installed.  This Github project provides the repository for the ESP32 BLE support for Arduino.
 
